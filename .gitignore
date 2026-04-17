@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.vite/
+.env
+.env.local
+.env.development
+.env.production
+_SECRETS_BACKUP_LOCAL/
+.config/
+.local/
+.semgrep/
+.DS_Store
+Thumbs.db
+*.log
