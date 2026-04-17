@@ -1,10 +1,11 @@
 import { FormEvent } from "react";
-import { Loader2 } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { Product } from "@shared/schema";
 
 type ContentData = {
@@ -21,8 +22,6 @@ interface ContentEditorProps {
   onProductSelect: (product: Product) => void;
   contentData: ContentData;
   onContentChange: (data: Partial<ContentData>) => void;
-  onGenerateContent: () => void;
-  isGenerating: boolean;
 }
 
 export default function ContentEditor({
@@ -30,25 +29,60 @@ export default function ContentEditor({
   selectedProduct,
   onProductSelect,
   contentData,
-  onContentChange,
-  onGenerateContent,
-  isGenerating
+  onContentChange
 }: ContentEditorProps) {
-  const handleSubmit = (e: FormEvent) => {
+  const { toast } = useToast();
+
+  const handleCopyScript = (e: FormEvent) => {
     e.preventDefault();
-    onGenerateContent();
+    if (!selectedProduct) return;
+
+    const url =
+      selectedProduct?.affiliateUrl ||
+      "https://vendeconia.org/guias";
+
+    const script = `
+🎬 GUION PARA REEL / TIKTOK
+
+Producto: ${selectedProduct.name}
+
+Título:
+${contentData.title}
+
+Descripción:
+${contentData.description}
+
+Música:
+${contentData.music}
+
+Animación:
+${contentData.animation}
+
+CTA:
+${contentData.cta}
+
+🔗 LINK:
+${url}
+    `.trim();
+
+    navigator.clipboard.writeText(script);
+    toast({
+      title: "Guion copiado",
+      description: "Incluye CTA y enlace listo para monetizar.",
+    });
   };
-  
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h3 className="text-lg font-bold text-gray-900 mb-6">Editor de contenido</h3>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Product Selection */}
+      <h3 className="text-lg font-bold text-gray-900 mb-6">
+        Editor de contenido
+      </h3>
+
+      <form onSubmit={handleCopyScript} className="space-y-6">
         <div>
-          <Label htmlFor="product-select" className="mb-2 block">Selecciona un producto</Label>
+          <Label className="mb-2 block">Producto</Label>
           <Select
-            value={selectedProduct?.id.toString() || ""}
+            value={selectedProduct?.id?.toString() || ""}
             onValueChange={(value) => {
               const product = products.find(p => p.id.toString() === value);
               if (product) onProductSelect(product);
@@ -66,132 +100,86 @@ export default function ContentEditor({
             </SelectContent>
           </Select>
         </div>
-        
-        {/* Title Input */}
+
         <div>
-          <Label htmlFor="video-title" className="mb-2 block">Título del video</Label>
+          <Label>Título</Label>
           <Input
-            id="video-title"
             value={contentData.title}
             onChange={(e) => onContentChange({ title: e.target.value })}
             maxLength={60}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            {contentData.title.length}/60 caracteres - Usa emojis y mayúsculas para captar atención
-          </p>
         </div>
-        
-        {/* Description Textarea */}
+
         <div>
-          <Label htmlFor="video-description" className="mb-2 block">Descripción del producto</Label>
+          <Label>Descripción</Label>
           <Textarea
-            id="video-description"
             rows={3}
             value={contentData.description}
             onChange={(e) => onContentChange({ description: e.target.value })}
             maxLength={200}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            {contentData.description.length}/200 caracteres - Resalta beneficios y urgencia
-          </p>
         </div>
-        
-        {/* Music Selection */}
+
         <div>
-          <Label htmlFor="video-music" className="mb-2 block">Música de fondo</Label>
+          <Label>Música</Label>
           <Select
             value={contentData.music}
             onValueChange={(value) => onContentChange({ music: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecciona un estilo de música" />
+              <SelectValue placeholder="Selecciona música" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Tendencia - Upbeat (Recomendado)">Tendencia - Upbeat (Recomendado)</SelectItem>
-              <SelectItem value="Energético - Electrónica">Energético - Electrónica</SelectItem>
-              <SelectItem value="Suave - Acústica">Suave - Acústica</SelectItem>
-              <SelectItem value="Divertido - Pop">Divertido - Pop</SelectItem>
-              <SelectItem value="Profesional - Corporativo">Profesional - Corporativo</SelectItem>
+              <SelectItem value="Upbeat tendencia">Upbeat tendencia</SelectItem>
+              <SelectItem value="Electrónica">Electrónica</SelectItem>
+              <SelectItem value="Pop">Pop</SelectItem>
+              <SelectItem value="Corporativa">Corporativa</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
-        {/* Animation Style */}
+
         <div>
-          <Label className="mb-2 block">Estilo de animación</Label>
-          <div className="grid grid-cols-3 gap-3">
-            <Button
-              type="button"
-              variant={contentData.animation === "Zoom" ? "secondary" : "outline"}
-              onClick={() => onContentChange({ animation: "Zoom" })}
-              className="justify-center"
-            >
-              Zoom
-            </Button>
-            <Button
-              type="button"
-              variant={contentData.animation === "Deslizar" ? "secondary" : "outline"}
-              onClick={() => onContentChange({ animation: "Deslizar" })}
-              className="justify-center"
-            >
-              Deslizar
-            </Button>
-            <Button
-              type="button"
-              variant={contentData.animation === "Rebote" ? "secondary" : "outline"}
-              onClick={() => onContentChange({ animation: "Rebote" })}
-              className="justify-center"
-            >
-              Rebote
-            </Button>
-          </div>
+          <Label>Animación</Label>
+          <Select
+            value={contentData.animation}
+            onValueChange={(value) => onContentChange({ animation: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona animación" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Zoom">Zoom</SelectItem>
+              <SelectItem value="Deslizar">Deslizar</SelectItem>
+              <SelectItem value="Rebote">Rebote</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        
-        {/* Call to Action */}
+
         <div>
-          <Label htmlFor="video-cta" className="mb-2 block">Llamada a la acción</Label>
+          <Label>CTA</Label>
           <Select
             value={contentData.cta}
             onValueChange={(value) => onContentChange({ cta: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecciona una llamada a la acción" />
+              <SelectValue placeholder="Selecciona CTA" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Comprar ahora">Comprar ahora</SelectItem>
-              <SelectItem value="¡Lo quiero!">¡Lo quiero!</SelectItem>
-              <SelectItem value="Ver más">Ver más</SelectItem>
               <SelectItem value="Oferta limitada">Oferta limitada</SelectItem>
-              <SelectItem value="Añadir al carrito">Añadir al carrito</SelectItem>
+              <SelectItem value="Lo quiero">Lo quiero</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
-        {/* Action Buttons */}
-        <div className="flex space-x-3 pt-4">
-          <Button 
-            type="submit" 
-            className="flex-1 bg-primary-500 hover:bg-primary-600"
-            disabled={isGenerating || !selectedProduct}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generando...
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1"/>
-                  <path d="m12 19 4-4-4-4"/>
-                  <path d="M16 15H9"/>
-                  <path d="M15 3h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1"/>
-                </svg>
-                Generar video
-              </>
-            )}
-          </Button>
-        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-primary-500 hover:bg-primary-600"
+          disabled={!selectedProduct}
+        >
+          <Copy className="h-4 w-4 mr-2" />
+          Copiar guion monetizable
+        </Button>
       </form>
     </div>
   );

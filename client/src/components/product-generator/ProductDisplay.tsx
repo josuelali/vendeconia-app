@@ -1,338 +1,119 @@
-import { useMemo, useState } from "react";
-import {
-  Star,
-  StarHalf,
-  DownloadIcon,
-  Share2Icon,
-  ShoppingCart,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Product } from "@shared/schema";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useState } from "react";
+import type { Product } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
+import { Copy, Info, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductDisplayProps {
   products: Product[];
 }
 
-async function safeJson(response: Response) {
-  const text = await response.text();
-
-  // Si viene HTML (doctype) u otra cosa, evitamos JSON.parse
-  if (text.trim().startsWith("<")) {
-    return {
-      __nonJson: true,
-      raw: text,
-    };
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {
-      __nonJson: true,
-      raw: text,
-    };
-  }
-}
-
-function extractErrorMessage(payload: any) {
-  if (!payload) return "Error desconocido";
-  if (typeof payload === "string") return payload;
-  if (payload?.message) return payload.message;
-  if (payload?.error?.message) return payload.error.message;
-  if (payload?.__nonJson)
-    return "El servidor devolvió una respuesta no válida (no JSON).";
-  return "No se pudo completar la operación.";
-}
-
 export default function ProductDisplay({ products }: ProductDisplayProps) {
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null,
-  );
   const { toast } = useToast();
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const baseUrl = useMemo(() => {
-    try {
-      return window.location.origin;
-    } catch {
-      return "";
-    }
-  }, []);
+  const handleCopyIdea = (product: Product) => {
+    navigator.clipboard.writeText(
+      `${product.name} - Precio aproximado: ${product.price}€`
+    );
 
-  /**
-   * GUARDAR
-   * Requiere endpoint: POST /api/products/:id/save
-   */
-  const saveProductMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      const response = await apiRequest(
-        "POST",
-        `/api/products/${productId}/save`,
-        { action: "save" },
-      );
-
-      const data = await safeJson(response);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message || `Error ${response.status} al guardar el producto.`,
-        );
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Producto guardado",
-        description: "El producto ha sido guardado en tu lista.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al guardar",
-        description:
-          error?.message ||
-          "No se pudo guardar el producto. Inténtalo de nuevo.",
-        variant: "destructive",
-      });
-    },
-    onSettled: () => setSelectedProductId(null),
-  });
-
-  /**
-   * AÑADIR
-   * Reutiliza /save con action:"add"
-   */
-  const addProductMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      const response = await apiRequest(
-        "POST",
-        `/api/products/${productId}/save`,
-        { action: "add" },
-      );
-
-      const data = await safeJson(response);
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message || `Error ${response.status} al añadir el producto.`,
-        );
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Añadido",
-        description: "Producto añadido correctamente.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error al añadir",
-        description:
-          error?.message ||
-          "No se pudo añadir el producto. Inténtalo de nuevo.",
-        variant: "destructive",
-      });
-    },
-    onSettled: () => setSelectedProductId(null),
-  });
-
-  const handleSaveProduct = (productId: number) => {
-    setSelectedProductId(productId);
-    saveProductMutation.mutate(productId);
+    toast({
+      title: "Idea copiada",
+      description: "Puedes usar esta idea para crear contenido o vender online.",
+    });
   };
-
-  const handleAddProduct = (productId: number) => {
-    setSelectedProductId(productId);
-    addProductMutation.mutate(productId);
-  };
-
-  const handleShareProduct = async (product: Product) => {
-    try {
-      const url = baseUrl
-        ? `${baseUrl}/products/${product.id}`
-        : `Producto: ${product.name}`;
-
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-        toast({
-          title: "Enlace copiado",
-          description: "Ya puedes pegarlo en WhatsApp/Instagram.",
-        });
-        return;
-      }
-
-      toast({
-        title: "Compartir",
-        description: url,
-      });
-    } catch (error: any) {
-      toast({
-        title: "No se pudo compartir",
-        description:
-          error?.message || "Inténtalo de nuevo o copia el texto manualmente.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <Star
-          key={`star-${i}`}
-          className="h-4 w-4 text-yellow-400 fill-yellow-400"
-        />,
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <StarHalf
-          key="half-star"
-          className="h-4 w-4 text-yellow-400 fill-yellow-400"
-        />,
-      );
-    }
-
-    const emptyStars = 5 - stars.length;
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <Star key={`empty-star-${i}`} className="h-4 w-4 text-yellow-400" />,
-      );
-    }
-
-    return stars;
-  };
-
-  const isBusy = (productId: number) =>
-    selectedProductId === productId &&
-    (saveProductMutation.isPending || addProductMutation.isPending);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-        Productos sugeridos
-      </h2>
+    <>
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Productos recomendados
+        </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <Card
-            key={product.id}
-            className="overflow-hidden hover:shadow-lg transition-shadow duration-300"
-          >
-            {product.imageUrl && (
-              <div className="h-60 overflow-hidden">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col justify-between"
+            >
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {product.name}
+                </h3>
 
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-3">
-                {product.trending && (
-                  <Badge
-                    variant="outline"
-                    className="bg-accent-50 text-accent-500 hover:bg-accent-50"
-                  >
-                    Tendencia
-                  </Badge>
-                )}
-                {product.views && (
-                  <span className="text-sm text-gray-500">
-                    Vistas: {product.views}
+                <p className="text-gray-700 font-medium mb-4">
+                  {product.price} €
+                </p>
+
+                {product.isTrending && (
+                  <span className="inline-block text-xs font-semibold bg-green-100 text-green-700 px-3 py-1 rounded-full mb-4">
+                    En tendencia
                   </span>
                 )}
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                {product.name}
-              </h3>
-
-              <p className="text-gray-600 text-sm mb-4">
-                {product.description}
-              </p>
-
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xl font-bold text-secondary-500">
-                  {product.price}
-                </span>
-                {product.rating && (
-                  <div className="flex items-center">
-                    <div className="flex mr-1">
-                      {renderStars(product.rating)}
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      ({product.reviews})
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {product.tags && product.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {product.tags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="bg-blue-50 text-blue-800 hover:bg-blue-50"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-
-            <CardFooter className="bg-gray-50 px-6 py-4 flex justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSaveProduct(product.id)}
-                disabled={isBusy(product.id)}
-              >
-                <DownloadIcon className="h-4 w-4 mr-2" />
-                Guardar
-              </Button>
-
-              <div className="flex space-x-2">
+              <div className="mt-6 flex gap-3">
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="text-accent-600 border-accent-200 hover:bg-accent-50"
-                  onClick={() => handleShareProduct(product)}
-                  disabled={isBusy(product.id)}
+                  className="flex items-center gap-2"
+                  onClick={() => handleCopyIdea(product)}
                 >
-                  <Share2Icon className="h-4 w-4 mr-2" />
-                  Compartir
+                  <Copy className="h-4 w-4" />
+                  Copiar idea
                 </Button>
 
                 <Button
-                  size="sm"
-                  onClick={() => handleAddProduct(product.id)}
-                  disabled={isBusy(product.id)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => setSelectedProduct(product)}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Añadir
+                  <Info className="h-4 w-4" />
+                  Ver detalles (demo)
                 </Button>
               </div>
-            </CardFooter>
-          </Card>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* MODAL DEMO */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              {selectedProduct.name}
+            </h3>
+
+            <p className="text-gray-700 mb-2">
+              <strong>Precio estimado:</strong> {selectedProduct.price} €
+            </p>
+
+            {selectedProduct.isTrending && (
+              <p className="text-green-700 font-semibold mb-2">
+                Producto en tendencia
+              </p>
+            )}
+
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+              Esta es una <strong>demostración</strong>.  
+              Próximamente podrás ver análisis completos, enlaces reales y
+              recomendaciones avanzadas con IA.
+            </div>
+
+            <div className="mt-6 text-right">
+              <Button onClick={() => setSelectedProduct(null)}>
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
