@@ -28,7 +28,7 @@ export default function ContentGenerator() {
   const [videoType, setVideoType] = useState("anuncio corto");
   const [style, setStyle] = useState("tecnológico");
   const [duration, setDuration] = useState("15 segundos");
-  const [title, setTitle] = useState("Crea tu primer asistente IA sin ser técnico");
+  const [title, setTitle] = useState("TEST NUEVO CAMBIO 🔥");
   const [description, setDescription] = useState(
     "Descubre cómo usar inteligencia artificial para automatizar tareas, vender más y ahorrar tiempo sin complicarte con herramientas sueltas."
   );
