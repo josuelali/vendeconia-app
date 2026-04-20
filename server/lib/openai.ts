@@ -6,14 +6,24 @@ import { storage } from "../storage";
 // ==========================
 
 function getOpenAIClient() {
-  if (!process.env.OPENAI_API_KEY) {
-    console.log("No OPENAI_API_KEY found");
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    console.error("OPENAI_API_KEY no configurada en el entorno del servidor");
     return null;
   }
 
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  return new OpenAI({ apiKey });
+}
+
+export function requireOpenAIClient() {
+  const client = getOpenAIClient();
+
+  if (!client) {
+    throw new Error("No hay OPENAI_API_KEY configurada.");
+  }
+
+  return client;
 }
 
 // ==========================
@@ -38,7 +48,7 @@ export async function generateText(prompt: string): Promise<string> {
 }
 
 // ==========================
-// RUN ASSISTANT (🔥 MVP CORE)
+// RUN ASSISTANT
 // ==========================
 
 export async function runAssistant(

@@ -1,67 +1,107 @@
-import express, {
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
-import http from "http";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-// Logging middleware (tipado correcto, sin apply ni spreads problemáticos)
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const start = Date.now();
-  const path = req.path;
+// ===== CONFIG =====
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-  const originalJson = res.json.bind(res);
+// ===== RUTA: GENERAR VIDEO =====
+app.post("/api/video/generate", async (req, res) => {
+  try {
+    const { idea, titulo, descripcion, cta } = req.body;
 
-  res.json = (body?: any): Response => {
-    const duration = Date.now() - start;
+    const prompt = `
+Crea un video vertical estilo TikTok/Reel.
 
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+Tema: ${idea}
+Título: ${titulo}
+Descripción: ${descripcion}
+CTA: ${cta}
 
-      if (body !== undefined) {
-        logLine += ` :: ${JSON.stringify(body)}`;
-      }
+Formato:
+- Hook fuerte en 3s
+- Mensaje claro
+- Cierre con CTA
+- Estilo viral
+`;
 
-      if (logLine.length > 120) {
-        logLine = logLine.slice(0, 119) + "…";
-      }
+    const response = await fetch("https://api.openai.com/v1/videos", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini-video",
+        prompt,
+        size: "720x1280",
+      }),
+    });
 
-      log(logLine);
+    const data = await response.json();
+
+    if (!data?.id) {
+      return res.status(500).json({ error: data });
     }
 
-    return originalJson(body);
-  };
-
-  next();
+    res.json({ videoId: data.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error generando video" });
+  }
 });
 
-(async () => {
-  await registerRoutes(app);
+// ===== RUTA: STATUS =====
+app.get("/api/video/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err?.status || err?.statusCode || 500;
-    const message = err?.message || "Internal Server Error";
-    res.status(status).json({ message });
-  });
+    const response = await fetch(`https://api.openai.com/v1/videos/${id}`, {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+    });
 
-  const server = http.createServer(app);
+    const data = await response.json();
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    res.json({
+      status: data.status,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Error status" });
   }
+});
 
-  const port = 5000;
+// ===== RUTA: CONTENIDO VIDEO =====
+app.get("/api/video/:id/content", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  server.listen(port, "0.0.0.0", () => {
-    log(`Server running on http://localhost:${port}`);
-  });
-})();
+    const response = await fetch(
+      `https://api.openai.com/v1/videos/${id}/content`,
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    const buffer = await response.arrayBuffer();
+
+    res.setHeader("Content-Type", "video/mp4");
+    res.send(Buffer.from(buffer));
+  } catch (err) {
+    res.status(500).json({ error: "Error content" });
+  }
+});
+
+// ===== START =====
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
