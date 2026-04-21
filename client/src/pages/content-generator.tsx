@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Clapperboard, Copy, Download, ExternalLink, PlayCircle, AlertCircle } from "lucide-react";
+import { Clapperboard, Copy, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,12 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 
-type VideoStatus = "idle" | "queued" | "processing" | "completed" | "failed";
-
 export default function ContentGenerator() {
   const { toast } = useToast();
-
-  const API_URL = import.meta.env.VITE_API_URL || "";
 
   const [projectUrl, setProjectUrl] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -37,12 +33,6 @@ export default function ContentGenerator() {
   const [ctaText, setCtaText] = useState("Entra ahora");
   const [ctaUrl, setCtaUrl] = useState("https://app.abrochat.com");
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [videoId, setVideoId] = useState<string | null>(null);
-  const [videoStatus, setVideoStatus] = useState<VideoStatus>("idle");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-
   useEffect(() => {
     document.title = "Generador de Contenido | VendeConIA";
   }, []);
@@ -57,7 +47,7 @@ ${description}
 #ia #inteligenciaartificial #automatizacion #negociosdigitales #chatgpt`;
   }, [title, description, ctaText, ctaUrl]);
 
-  const canGenerate = useMemo(() => {
+  const canPrepare = useMemo(() => {
     return Boolean((projectUrl || projectName) && title && description && ctaText && ctaUrl);
   }, [projectUrl, projectName, title, description, ctaText, ctaUrl]);
 
@@ -79,6 +69,15 @@ ${description}
   };
 
   const handleCopyBriefing = async () => {
+    if (!canPrepare) {
+      toast({
+        title: "Faltan campos",
+        description: "Completa URL o nombre del proyecto, título, descripción y CTA.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const briefing = `
 🎬 BRIEFING DE VÍDEO PROMOCIONAL
 
@@ -114,12 +113,22 @@ ${music}
 
 Animación:
 ${animation}
+
+GUION BASE PROPUESTO:
+1. Gancho inicial de 2-3 segundos
+2. Problema o deseo principal del usuario
+3. Presentación breve del proyecto
+4. Beneficio principal
+5. CTA final claro
+
+TEXTO PROMOCIONAL:
+${publishText}
     `.trim();
 
     await copyText(
       briefing,
       "Briefing copiado",
-      "Ya tienes el briefing listo para reutilizar o revisar."
+      "Ya tienes el briefing listo para reutilizar en ChatGPT, Pictory, CapCut o donde quieras producir el vídeo."
     );
   };
 
@@ -149,141 +158,6 @@ ${description}
     window.open("https://studio.youtube.com", "_blank", "noopener,noreferrer");
   };
 
-  const handleGenerateVideo = async () => {
-    if (!API_URL) {
-      toast({
-        title: "Falta configuración",
-        description: "No existe VITE_API_URL en el frontend.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!canGenerate) {
-      toast({
-        title: "Faltan campos",
-        description: "Completa URL o nombre del proyecto, título, descripción y CTA.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsGenerating(true);
-      setVideoId(null);
-      setVideoUrl("");
-      setVideoStatus("queued");
-      setErrorMessage("");
-
-      const response = await fetch(`${API_URL}/api/video/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idea: `${projectName || "Proyecto digital"} - ${videoType} - ${style}`,
-          titulo: title,
-          descripcion: `
-Proyecto: ${projectName || "No indicado"}
-URL: ${projectUrl || "No indicada"}
-Mensaje principal: ${description}
-Tipo de vídeo: ${videoType}
-Estilo: ${style}
-Duración: ${duration}
-Música: ${music}
-Animación: ${animation}
-CTA: ${ctaText}
-URL CTA: ${ctaUrl}
-          `.trim(),
-          cta: `${ctaText} - ${ctaUrl}`,
-          urlProyecto: projectUrl,
-          nombreProyecto: projectName,
-          tipoVideo: videoType,
-          estilo: style,
-          duracion: duration,
-          musica: music,
-          animacion: animation,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data?.videoId) {
-        throw new Error(
-          data?.error ? JSON.stringify(data.error) : "No se recibió videoId"
-        );
-      }
-
-      setVideoId(data.videoId);
-      toast({
-        title: "Generación iniciada",
-        description: "El vídeo se está generando. Espera unos segundos.",
-      });
-    } catch (error) {
-      console.error(error);
-      setVideoStatus("failed");
-      setErrorMessage("No se pudo iniciar la generación del vídeo.");
-      toast({
-        title: "Error al generar vídeo",
-        description: "Revisa el backend o el modelo configurado.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!videoId || !API_URL) return;
-
-    let cancelled = false;
-    let timeoutId: number | undefined;
-
-    const pollStatus = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/video/${videoId}/status`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data?.error || "No se pudo consultar el estado.");
-        }
-
-        if (cancelled) return;
-
-        const nextStatus = (data?.status || "processing") as VideoStatus;
-        setVideoStatus(nextStatus);
-
-        if (nextStatus === "completed") {
-          setVideoUrl(`${API_URL}/api/video/${videoId}/content`);
-          return;
-        }
-
-        if (nextStatus === "failed") {
-          setErrorMessage("La generación del vídeo ha fallado.");
-          return;
-        }
-
-        timeoutId = window.setTimeout(() => {
-          if (!cancelled) void pollStatus();
-        }, 4000);
-      } catch (error) {
-        console.error(error);
-        if (!cancelled) {
-          setVideoStatus("failed");
-          setErrorMessage("Error consultando el estado del vídeo.");
-        }
-      }
-    };
-
-    setVideoStatus("queued");
-    void pollStatus();
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
-  }, [videoId, API_URL]);
-
   return (
     <>
       <Navbar />
@@ -294,7 +168,7 @@ URL CTA: ${ctaUrl}
             Generador de Contenido
           </h1>
           <p className="mt-2 text-lg text-gray-600">
-            Crea vídeos promocionales para tus apps, webs y landings usando IA.
+            Prepara el briefing y el texto base para crear vídeos promocionales de tus apps, webs y landings.
           </p>
         </div>
 
@@ -302,110 +176,49 @@ URL CTA: ${ctaUrl}
           <div className="mb-8 lg:mb-0">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6">
-                Vista previa de vídeo
+                Vista previa del flujo
               </h3>
 
-              {!videoId && (
-                <Card className="bg-slate-950 rounded-xl aspect-[9/16] flex items-center justify-center">
-                  <CardContent className="p-6 text-center">
-                    <Clapperboard className="h-10 w-10 text-white/70 mx-auto mb-4" />
-                    <p className="text-white text-lg font-semibold mb-2">
-                      Sin vídeo generado aún
-                    </p>
-                    <p className="text-white/70 text-sm max-w-xs mx-auto">
-                      Completa el editor y pulsa <strong>Generar vídeo real</strong>.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {videoId && (videoStatus === "queued" || videoStatus === "processing") && (
-                <Card className="bg-slate-950 rounded-xl aspect-[9/16] flex items-center justify-center">
-                  <CardContent className="p-6 text-center">
-                    <Loader2 className="h-10 w-10 text-cyan-400 animate-spin mx-auto mb-4" />
-                    <p className="text-white text-lg font-semibold mb-2">
-                      Generando vídeo...
-                    </p>
-                    <p className="text-white/70 text-sm max-w-xs mx-auto">
-                      Estado actual: {videoStatus}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {videoId && videoStatus === "failed" && (
-                <Card className="bg-slate-950 rounded-xl aspect-[9/16] flex items-center justify-center">
-                  <CardContent className="p-6 text-center">
-                    <AlertCircle className="h-10 w-10 text-red-400 mx-auto mb-4" />
-                    <p className="text-white text-lg font-semibold mb-2">
-                      Error al generar
-                    </p>
-                    <p className="text-white/70 text-sm max-w-xs mx-auto">
-                      {errorMessage || "No se pudo completar la generación."}
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {videoId && videoStatus === "completed" && videoUrl && (
-                <>
-                  <div className="bg-slate-950 rounded-xl overflow-hidden shadow-xl p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <PlayCircle className="h-5 w-5 text-cyan-400" />
-                      <p className="text-white font-medium">Resultado final</p>
-                    </div>
-
-                    <video
-                      src={videoUrl}
-                      controls
-                      playsInline
-                      className="w-full max-w-[360px] mx-auto rounded-lg bg-black"
-                    />
+              <Card className="bg-slate-950 rounded-xl aspect-[9/16] flex items-center justify-center">
+                <CardContent className="p-6 text-center">
+                  <Clapperboard className="h-10 w-10 text-white/70 mx-auto mb-4" />
+                  <p className="text-white text-lg font-semibold mb-2">
+                    Briefing listo para producir
+                  </p>
+                  <p className="text-white/70 text-sm max-w-xs mx-auto mb-4">
+                    Completa el editor y pulsa <strong>Copiar briefing</strong> para llevarte la idea, el guion base y el CTA.
+                  </p>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-300">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    Generación de vídeo real en revisión
                   </div>
+                </CardContent>
+              </Card>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        const link = document.createElement("a");
-                        link.href = videoUrl;
-                        link.download = `${projectName || "video-generado"}.mp4`;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                      }}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Descargar vídeo
-                    </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handlePrepareTikTok}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Preparar TikTok
+                </Button>
 
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={handlePrepareTikTok}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      TikTok
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={handlePrepareYouTube}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      YouTube
-                    </Button>
-                  </div>
-                </>
-              )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handlePrepareYouTube}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Preparar YouTube
+                </Button>
+              </div>
 
               <p className="text-center text-gray-500 text-sm mt-4">
-                Usa esta pieza para promocionar tus proyectos y reutilizarla en redes.
+                Usa esta pieza para promocionar tus proyectos y reutilizarla en redes o herramientas externas.
               </p>
             </div>
           </div>
@@ -417,7 +230,7 @@ URL CTA: ${ctaUrl}
               </h3>
 
               <p className="text-sm text-gray-600 mb-6">
-                Este bloque está pensado para crear vídeos promocionales para tus apps y webs.
+                Este bloque prepara un briefing reutilizable para crear vídeos promocionales sin bloquearte con integraciones inestables.
               </p>
 
               <div className="space-y-6">
@@ -557,21 +370,29 @@ URL CTA: ${ctaUrl}
                   />
                 </div>
 
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-medium text-amber-900 mb-1">
+                    Generación real de vídeo
+                  </p>
+                  <p className="text-sm text-amber-800">
+                    Esta función queda temporalmente en revisión. Mientras tanto, usa el briefing para producir el vídeo en herramientas externas sin bloquear el flujo.
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Button
                     type="button"
-                    className="w-full bg-primary-500 hover:bg-primary-600"
-                    onClick={handleGenerateVideo}
-                    disabled={isGenerating}
+                    variant="outline"
+                    className="w-full opacity-60 cursor-not-allowed"
+                    disabled
                   >
                     <Clapperboard className="h-4 w-4 mr-2" />
-                    {isGenerating ? "Generando..." : "Generar vídeo real"}
+                    Vídeo real próximamente
                   </Button>
 
                   <Button
                     type="button"
-                    variant="outline"
-                    className="w-full"
+                    className="w-full bg-primary-500 hover:bg-primary-600"
                     onClick={handleCopyBriefing}
                   >
                     <Copy className="h-4 w-4 mr-2" />
