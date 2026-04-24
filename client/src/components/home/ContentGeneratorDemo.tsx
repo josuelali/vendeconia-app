@@ -1,5 +1,7 @@
 import { Link } from "wouter";
-import { ArrowRight, Clapperboard, FileText, Sparkles, Wand2 } from "lucide-react";
+import { ArrowRight, Clapperboard, ExternalLink, FileText, Sparkles, Wand2 } from "lucide-react";
+
+const PICTORY_AFFILIATE_URL = "https://pictory.ai?ref=joshue-cabello-rosa72";
 
 const contentOutputs = [
   {
@@ -34,7 +36,6 @@ export default function ContentGeneratorDemo() {
 
       <div className="relative max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-center">
-          {/* COLUMNA IZQUIERDA */}
           <div>
             <p className="inline-flex items-center rounded-full border border-orange-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-orange-600 shadow-sm">
               Contenido asistido
@@ -90,7 +91,6 @@ export default function ContentGeneratorDemo() {
             </div>
           </div>
 
-          {/* COLUMNA DERECHA */}
           <div className="space-y-5">
             <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-slate-950 text-white shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/10 px-5 py-4 bg-slate-900">
@@ -189,33 +189,45 @@ export default function ContentGeneratorDemo() {
 
               <div className="rounded-3xl border border-orange-200 bg-gradient-to-br from-orange-50 to-amber-100 p-6 shadow-sm">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-700">
-                  Siguiente integración lógica
+                  Monetización con Pictory
                 </p>
                 <h3 className="mt-3 text-xl font-extrabold text-slate-900">
-                  Conectar esta salida con Pictory
+                  Convierta el guion en vídeo con IA
                 </h3>
                 <p className="mt-3 text-sm sm:text-base leading-7 text-slate-700">
                   Cuando el texto y el guion estén bien, el siguiente salto natural es
-                  convertir esa base en vídeo, reel o pieza visual usando una herramienta
-                  orientada a producción rápida.
+                  convertir esa base en vídeo, reel o pieza visual usando Pictory.
                 </p>
 
-<div className="mt-16 p-6 bg-[#0B0F1A] rounded-2xl border border-[#1E293B]">
-  <h2 className="text-white text-2xl mb-4">
-    Crear vídeo viral para redes
-  </h2>
+                <a
+                  href={PICTORY_AFFILIATE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-orange-500 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600"
+                >
+                  Convertir guion en vídeo con Pictory
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
 
-  <p className="text-gray-400 mb-6">
-    Genera guiones listos para TikTok, YouTube Shorts e Instagram en segundos.
-  </p>
+                <div className="mt-5 rounded-2xl border border-slate-800 bg-[#0B0F1A] p-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-purple-300">
+                    Paso previo
+                  </p>
+                  <h3 className="mt-2 text-xl font-extrabold text-white">
+                    Generar guion viral listo para redes
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    Use esta herramienta antes de producir el vídeo en Pictory o CapCut.
+                    Prepare hook, guion, caption, hashtags y CTA.
+                  </p>
 
-  <button
-    onClick={() => window.location.href = "/video-viral"}
-    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg"
-  >
-    Crear vídeo ahora
-  </button>
-</div>
+                  <Link href="/video-viral">
+                    <a className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-purple-600 px-5 py-4 text-sm font-bold text-white transition hover:bg-purple-700">
+                      Generar guion viral
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
