@@ -199,6 +199,23 @@ export default function ContentGeneratorDemo() {
                   convertir esa base en vídeo, reel o pieza visual usando una herramienta
                   orientada a producción rápida.
                 </p>
+
+<div className="mt-16 p-6 bg-[#0B0F1A] rounded-2xl border border-[#1E293B]">
+  <h2 className="text-white text-2xl mb-4">
+    Crear vídeo viral para redes
+  </h2>
+
+  <p className="text-gray-400 mb-6">
+    Genera guiones listos para TikTok, YouTube Shorts e Instagram en segundos.
+  </p>
+
+  <button
+    onClick={() => window.location.href = "/video-viral"}
+    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg"
+  >
+    Crear vídeo ahora
+  </button>
+</div>
               </div>
             </div>
           </div>

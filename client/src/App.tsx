@@ -12,6 +12,7 @@ import Pricing from "@/pages/pricing";
 import Templates from "@/pages/templates";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
+import VideoViral from "./pages/VideoViral";
 
 function NotFound() {
   return (
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/templates" component={Templates} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/video-viral" component={VideoViral} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
