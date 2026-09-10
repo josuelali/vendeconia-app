@@ -14,6 +14,14 @@ const STORE_PRODUCTS: Record<string, { name: string; unitAmount: number }> = {
     name: "Soporte 360° para Teléfono o Tablet en Coche",
     unitAmount: 2499,
   },
+  "correa-manos-libres-perro": {
+    name: "Correa Manos Libres para Perro",
+    unitAmount: 2799,
+  },
+  "disfraz-vaquero-mascota": {
+    name: "Disfraz Vaquero para Mascotas",
+    unitAmount: 2199,
+  },
 };
 
 function storefrontBaseUrl(req: any): string {
