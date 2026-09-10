@@ -5,7 +5,7 @@ type StoreProduct = { name: string; unitAmount: number; variants?: string[] };
 const STORE_PRODUCTS: Record<string, StoreProduct> = {
   "guante-quitapelos": { name:"Guante Quitapelos Reutilizable para Mascotas", unitAmount:1499 },
   "kit-limpieza-7-en-1": { name:"Kit de Limpieza 7 en 1 para Electrónica", unitAmount:1699 },
-  "soporte-coche-360": { name:"Soporte Kouwolsen H02 360° para Móvil o Tablet", unitAmount:2499 },
+  "soporte-coche-360": { name:"Soporte Flexible 360° para Teléfono", unitAmount:1499 },
   "correa-manos-libres-perro": { name:"Correa Manos Libres para Perro", unitAmount:2799, variants:["Naranja","Verde","Negro"] },
   "disfraz-vaquero-mascota": { name:"Disfraz Vaquero para Mascotas", unitAmount:2199, variants:["S","M","L","XL"] },
   "disfraz-terror-mascota": { name:"Disfraz de Terror para Perro", unitAmount:1999, variants:["S","M","L"] },
