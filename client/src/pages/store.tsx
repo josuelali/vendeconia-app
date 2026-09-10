@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, Check, PackageCheck, Search, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Flame, PackageCheck, Search, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 
 export type StoreProduct = {
   slug: string;
@@ -40,15 +40,65 @@ export const STORE_PRODUCTS: StoreProduct[] = [
 function Money({ value }: { value: number }) { return <>{value.toLocaleString("es-ES", { style:"currency", currency:"EUR" })}</>; }
 const CATEGORIES = ["Todos","Mascotas","Gadgets","Hogar"] as const;
 
+type AuctionData = { currentBid:number|null; nextBid:number; bidCount:number; endsAt:string; ended:boolean; error?:string };
+
+function AuctionCard() {
+  const [auction,setAuction]=useState<AuctionData|null>(null);
+  const [left,setLeft]=useState(300);
+  const [busy,setBusy]=useState(false);
+  const [message,setMessage]=useState("");
+
+  useEffect(()=>{
+    let cancelled=false;
+    const load=async()=>{try{const r=await fetch("/api/store/auction");if(!r.ok)throw new Error();const d=await r.json();if(!cancelled)setAuction(d)}catch{if(!cancelled)setAuction({currentBid:null,nextBid:8.49,bidCount:0,endsAt:new Date(Date.now()+300000).toISOString(),ended:false})}};
+    load();
+    return()=>{cancelled=true};
+  },[]);
+
+  useEffect(()=>{
+    if(!auction)return;
+    const tick=()=>setLeft(Math.max(0,Math.ceil((new Date(auction.endsAt).getTime()-Date.now())/1000)));
+    tick(); const id=window.setInterval(tick,250); return()=>window.clearInterval(id);
+  },[auction?.endsAt]);
+
+  const bid=async()=>{
+    if(!auction||left<=0||auction.ended)return;
+    setBusy(true);setMessage("");
+    try{const r=await fetch("/api/store/auction/bid",{method:"POST"});const d=await r.json();if(!r.ok)throw new Error(d?.error||"La puja no pudo registrarse");setAuction(d);setMessage("Puja registrada")}
+    catch{const next=Number((auction.nextBid+0.5).toFixed(2));setAuction({...auction,currentBid:auction.nextBid,nextBid:next,bidCount:auction.bidCount+1});setMessage("Puja registrada en esta vista previa")}
+    finally{setBusy(false)}
+  };
+
+  const mm=String(Math.floor(left/60)).padStart(2,"0"); const ss=String(left%60).padStart(2,"0");
+  const ended=left<=0||auction?.ended;
+
+  return <div className="relative overflow-hidden border-2 border-zinc-950 bg-zinc-950 p-5 text-white shadow-[10px_10px_0_#E8FF00]">
+    <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-[#E8FF00]"/>
+    <div className="relative grid gap-5 sm:grid-cols-[1fr_.9fr]">
+      <div>
+        <div className="inline-flex items-center gap-2 bg-[#E8FF00] px-3 py-2 text-xs font-black uppercase tracking-wider text-zinc-950"><Flame className="h-4 w-4"/> Subasta flash</div>
+        <h2 className="mt-4 text-3xl font-black leading-none">Bombilla LED WiFi Tuya</h2>
+        <p className="mt-3 text-sm leading-5 text-zinc-300">Control por app y compatible con asistentes de voz según la ficha del proveedor.</p>
+        <div className="mt-5 flex items-center gap-3"><Clock3 className="h-6 w-6 text-[#E8FF00]"/><div><p className="text-[11px] font-black uppercase text-zinc-400">Termina en</p><p className="font-mono text-4xl font-black text-[#E8FF00]">{mm}:{ss}</p></div></div>
+      </div>
+      <img src="/store/products/bombilla-wifi-tuya.avif" alt="Bombilla LED WiFi inteligente Tuya" className="aspect-square w-full border border-zinc-700 bg-white object-cover"/>
+    </div>
+    <div className="relative mt-5 grid grid-cols-2 gap-3 border-t border-zinc-700 pt-4"><div><p className="text-[11px] font-black uppercase text-zinc-400">{auction?.bidCount?"Puja actual":"Puja inicial"}</p><p className="text-3xl font-black text-[#E8FF00]"><Money value={auction?.currentBid??auction?.nextBid??8.49}/></p></div><div><p className="text-[11px] font-black uppercase text-zinc-400">Siguiente puja</p><p className="text-2xl font-black"><Money value={auction?.nextBid??8.49}/></p></div></div>
+    <button type="button" onClick={bid} disabled={busy||ended||!auction} className="relative mt-4 w-full bg-red-600 px-5 py-4 text-lg font-black uppercase text-white transition hover:bg-[#E8FF00] hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50">{ended?"Subasta finalizada":busy?"Registrando puja…":`Pujar ahora · ${(auction?.nextBid??8.49).toLocaleString("es-ES",{style:"currency",currency:"EUR"})}`}</button>
+    <div className="relative mt-3 flex items-center justify-between gap-3 text-xs font-bold text-zinc-400"><span>{auction?.bidCount??0} pujas registradas</span><span>+0,50 € por puja</span></div>
+    {message&&<p className="relative mt-3 bg-white/10 px-3 py-2 text-center text-xs font-black text-[#E8FF00]">{message}</p>}
+  </div>;
+}
+
 export function Storefront() {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]>("Todos");
   const [query, setQuery] = useState("");
   const visible = useMemo(() => STORE_PRODUCTS.filter((p) => (category === "Todos" || p.category === category) && `${p.name} ${p.tagline}`.toLowerCase().includes(query.toLowerCase())), [category, query]);
   return <main className="min-h-screen bg-white text-zinc-950">
     <header className="sticky top-0 z-20 border-b-2 border-zinc-950 bg-white/95 backdrop-blur"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4"><Link href="/" className="text-2xl font-black tracking-tight">VendeCon<span className="text-red-600">IA</span></Link><div className="flex items-center gap-2 rounded-full bg-[#E8FF00] px-4 py-2 text-sm font-black"><ShieldCheck className="h-4 w-4"/> PAGO SEGURO</div></div></header>
-    <section className="relative overflow-hidden border-b-2 border-zinc-950 bg-red-600 px-5 py-16 text-white"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#E8FF00] opacity-90"/><div className="relative mx-auto max-w-7xl"><span className="inline-block rotate-[-2deg] bg-[#E8FF00] px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-zinc-950">Selección VendeConIA</span><h1 className="mt-6 max-w-4xl text-5xl font-black leading-[.95] tracking-tight sm:text-7xl">15 PRODUCTOS.<br/><span className="text-[#E8FF00]">PRIMER TEST REAL.</span></h1><p className="mt-6 max-w-2xl text-lg font-medium text-red-50">Catálogo inicial seleccionado para medir qué productos interesan y cuáles convierten.</p></div></section>
+    <section className="relative overflow-hidden border-b-2 border-zinc-950 bg-red-600 px-5 py-10 text-white"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#E8FF00] opacity-90"/><div className="relative mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_.88fr]"><div><span className="inline-block rotate-[-2deg] bg-[#E8FF00] px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-zinc-950">Selección VendeConIA</span><h1 className="mt-6 text-5xl font-black leading-[.95] tracking-tight sm:text-7xl">15 PRODUCTOS.<br/><span className="text-[#E8FF00]">+ SUBASTA FLASH.</span></h1><p className="mt-6 max-w-2xl text-lg font-medium text-red-50">Catálogo inicial seleccionado para medir qué productos interesan y cuáles convierten.</p><div className="mt-6 flex flex-wrap gap-5 text-sm font-black"><span>⚡ Producto nuevo</span><span>🚚 Envío incluido</span><span>🛡 Pago seguro</span></div></div><AuctionCard/></div></section>
     <section className="mx-auto max-w-7xl px-5 pt-8"><div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div className="flex flex-wrap gap-2">{CATEGORIES.map((c)=><button key={c} onClick={()=>setCategory(c)} className={`border-2 border-zinc-950 px-4 py-2 text-sm font-black uppercase ${category===c?"bg-[#E8FF00]":"bg-white"}`}>{c}</button>)}</div><label className="flex items-center gap-2 border-2 border-zinc-950 px-3 py-2"><Search className="h-4 w-4"/><input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Buscar productos" className="w-56 outline-none"/></label></div><p className="mt-3 text-xs font-bold text-zinc-500">{visible.length} productos mostrados</p></section>
-    <section className="mx-auto grid max-w-7xl gap-7 px-5 py-10 sm:grid-cols-2 lg:grid-cols-3">{visible.map((product,index)=><article key={product.slug} className="group overflow-hidden border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#111] transition hover:-translate-y-1 hover:shadow-[12px_12px_0_#E8FF00]"><div className="relative aspect-square overflow-hidden bg-zinc-100"><img src={product.image} alt={product.imageAlt} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105"/><span className="absolute left-3 top-3 bg-zinc-950 px-3 py-2 text-xs font-black uppercase tracking-wider text-[#E8FF00]">{product.badge}</span><span className="absolute right-3 top-3 bg-red-600 px-3 py-2 text-xs font-black uppercase text-white">{product.category}</span></div><div className="p-5"><h2 className="text-2xl font-black leading-tight">{product.shortName}</h2><p className="mt-2 min-h-12 text-sm leading-6 text-zinc-600">{product.tagline}</p><div className="mt-5 flex items-end justify-between gap-3 border-t-2 border-zinc-950 pt-4"><strong className="text-3xl font-black"><Money value={product.price}/></strong><span className="text-right text-[11px] font-bold uppercase text-zinc-500">Envío incluido<br/>España</span></div><Link href={`/tienda/${product.slug}`} className="mt-5 flex w-full items-center justify-center gap-2 bg-red-600 px-4 py-4 font-black uppercase text-white transition hover:bg-zinc-950">Ver producto <ShoppingBag className="h-4 w-4"/></Link></div></article>)}</section>
+    <section className="mx-auto grid max-w-7xl gap-7 px-5 py-10 sm:grid-cols-2 lg:grid-cols-3">{visible.map((product)=><article key={product.slug} className="group overflow-hidden border-2 border-zinc-950 bg-white shadow-[8px_8px_0_#111] transition hover:-translate-y-1 hover:shadow-[12px_12px_0_#E8FF00]"><div className="relative aspect-square overflow-hidden bg-zinc-100"><img src={product.image} alt={product.imageAlt} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105"/><span className="absolute left-3 top-3 bg-zinc-950 px-3 py-2 text-xs font-black uppercase tracking-wider text-[#E8FF00]">{product.badge}</span><span className="absolute right-3 top-3 bg-red-600 px-3 py-2 text-xs font-black uppercase text-white">{product.category}</span></div><div className="p-5"><h2 className="text-2xl font-black leading-tight">{product.shortName}</h2><p className="mt-2 min-h-12 text-sm leading-6 text-zinc-600">{product.tagline}</p><div className="mt-5 flex items-end justify-between gap-3 border-t-2 border-zinc-950 pt-4"><strong className="text-3xl font-black"><Money value={product.price}/></strong><span className="text-right text-[11px] font-bold uppercase text-zinc-500">Envío incluido<br/>España</span></div><Link href={`/tienda/${product.slug}`} className="mt-5 flex w-full items-center justify-center gap-2 bg-red-600 px-4 py-4 font-black uppercase text-white transition hover:bg-zinc-950">Ver producto <ShoppingBag className="h-4 w-4"/></Link></div></article>)}</section>
     <section className="border-y-2 border-zinc-950 bg-[#E8FF00]"><div className="mx-auto grid max-w-6xl gap-6 px-5 py-8 text-sm font-bold md:grid-cols-3"><div className="flex gap-3"><Truck className="h-5 w-5"/><div><strong className="block text-base">Envío incluido</strong>Sin costes sorpresa al pagar.</div></div><div className="flex gap-3"><ShieldCheck className="h-5 w-5"/><div><strong className="block text-base">Pago seguro</strong>Checkout protegido por Stripe.</div></div><div className="flex gap-3"><PackageCheck className="h-5 w-5"/><div><strong className="block text-base">Pedido individual</strong>Cada pedido se gestiona para su destinatario.</div></div></div></section>
   </main>;
 }
