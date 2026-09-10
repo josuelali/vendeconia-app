@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,6 +13,7 @@ import Templates from "@/pages/templates";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import VideoViral from "./pages/VideoViral";
+import { Storefront, StoreProductPage, StoreThanks } from "@/pages/store";
 
 function NotFound() {
   return (
@@ -31,6 +32,9 @@ function Router() {
     <Switch>
       {/* Show homepage by default */}
       <Route path="/" component={Home} />
+      <Route path="/tienda" component={Storefront} />
+      <Route path="/tienda/gracias" component={StoreThanks} />
+      <Route path="/tienda/:slug" component={StoreProductPage} />
       <Route path="/product-generator" component={ProductGenerator} />
       <Route path="/content-generator" component={ContentGenerator} />
       <Route path="/pricing" component={Pricing} />
@@ -44,13 +48,15 @@ function Router() {
   );
 }
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
+function AppContent() {
+  const [location] = useLocation();
+  const isStore = location.startsWith("/tienda");
 
-        {/* Botón Amazon (visible en TODAS las páginas) */}
+  return (
+    <TooltipProvider>
+      <Toaster />
+
+      {!isStore && (
         <div
           style={{
             display: "flex",
@@ -78,9 +84,17 @@ function App() {
             Ver producto recomendado en Amazon
           </a>
         </div>
+      )}
 
-        <Router />
-      </TooltipProvider>
+      <Router />
+    </TooltipProvider>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
     </QueryClientProvider>
   );
 }
