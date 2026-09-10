@@ -80,24 +80,32 @@
 /* Auction product image: crop edge pixels so the source border does not show. */
 img[alt="Bombilla LED WiFi inteligente Tuya"] {
   object-position: center center;
-  transform: scale(1.055);
+  transform: scale(1.07);
   transform-origin: center center;
 }
 
-/* Auction CTA: tactile hover without continuous distracting animation. */
-section.bg-red-600 button.bg-red-600:not(:disabled) {
-  transform: translateY(0) scale(1);
+/* Remove the neon-yellow outer edge/shadow from the flash-auction card. */
+section.bg-red-600 [class*="shadow-[10px_10px_0_#E8FF00]"] {
+  box-shadow: none !important;
+}
+
+/* Auction CTA: clearly visible motion on hover/press. */
+section.bg-red-600 button[type="button"][class*="text-lg"][class*="bg-red-600"]:not(:disabled) {
+  transform: translate3d(0,0,0) scale(1);
+  transform-origin: center;
   box-shadow: 0 0 0 rgba(232,255,0,0);
-  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, color 160ms ease;
+  transition: transform 180ms cubic-bezier(.2,.9,.2,1.25), box-shadow 180ms ease, background-color 180ms ease, color 180ms ease !important;
+  will-change: transform;
 }
-section.bg-red-600 button.bg-red-600:not(:disabled):hover {
-  transform: translateY(-3px) scale(1.025);
-  box-shadow: 0 8px 0 #111, 0 0 22px rgba(232,255,0,.55);
+section.bg-red-600 button[type="button"][class*="text-lg"][class*="bg-red-600"]:not(:disabled):hover {
+  transform: translate3d(0,-7px,0) scale(1.045) rotate(-0.35deg) !important;
+  box-shadow: 0 10px 0 #111, 0 16px 28px rgba(0,0,0,.28), 0 0 28px rgba(232,255,0,.72) !important;
 }
-section.bg-red-600 button.bg-red-600:not(:disabled):active {
-  transform: translateY(1px) scale(.99);
-  box-shadow: 0 2px 0 #111;
+section.bg-red-600 button[type="button"][class*="text-lg"][class*="bg-red-600"]:not(:disabled):active {
+  transform: translate3d(0,2px,0) scale(.985) !important;
+  box-shadow: 0 2px 0 #111 !important;
+  transition-duration: 70ms !important;
 }
 @media (prefers-reduced-motion: reduce) {
-  section.bg-red-600 button.bg-red-600:not(:disabled) { transition: none; }
+  section.bg-red-600 button[type="button"][class*="text-lg"][class*="bg-red-600"]:not(:disabled) { transition: none !important; }
 }
