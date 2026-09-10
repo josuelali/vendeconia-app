@@ -13,7 +13,8 @@ import Templates from "@/pages/templates";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import VideoViral from "./pages/VideoViral";
-import { Storefront, StoreProductPage, StoreThanks } from "@/pages/store";
+import { Storefront, StoreThanks } from "@/pages/store";
+import StoreProductRich from "@/pages/store-product-rich";
 
 function NotFound() {
   return (
@@ -34,7 +35,7 @@ function Router() {
       <Route path="/" component={Storefront} />
       <Route path="/tienda" component={Storefront} />
       <Route path="/tienda/gracias" component={StoreThanks} />
-      <Route path="/tienda/:slug" component={StoreProductPage} />
+      <Route path="/tienda/:slug" component={StoreProductRich} />
 
       {/* Legacy VendeConIA app remains reachable without occupying the public homepage */}
       <Route path="/app" component={Home} />
