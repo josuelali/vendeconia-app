@@ -112,3 +112,10 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.2s ease-in-out;
 }
+
+/* Auction product image: crop a few edge pixels so the source border does not show. */
+img[alt="Bombilla LED WiFi inteligente Tuya"] {
+  object-position: center center;
+  transform: scale(1.045);
+  transform-origin: center center;
+}
