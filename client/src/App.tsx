@@ -30,11 +30,14 @@ function NotFound() {
 function Router() {
   return (
     <Switch>
-      {/* Show homepage by default */}
-      <Route path="/" component={Home} />
+      {/* Storefront is now the public VendeConIA homepage */}
+      <Route path="/" component={Storefront} />
       <Route path="/tienda" component={Storefront} />
       <Route path="/tienda/gracias" component={StoreThanks} />
       <Route path="/tienda/:slug" component={StoreProductPage} />
+
+      {/* Legacy VendeConIA app remains reachable without occupying the public homepage */}
+      <Route path="/app" component={Home} />
       <Route path="/product-generator" component={ProductGenerator} />
       <Route path="/content-generator" component={ContentGenerator} />
       <Route path="/pricing" component={Pricing} />
@@ -50,7 +53,7 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
-  const isStore = location.startsWith("/tienda");
+  const isStore = location === "/" || location.startsWith("/tienda");
 
   return (
     <TooltipProvider>
