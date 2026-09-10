@@ -29,7 +29,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
       "Sin pilas, cables ni consumibles",
       "Envío incluido a España",
     ],
-    badge: "Producto piloto",
+    badge: "Selección VendeConIA",
     icon: "pet",
   },
   {
@@ -46,7 +46,7 @@ export const STORE_PRODUCTS: StoreProduct[] = [
       "Fácil de guardar y transportar",
       "Envío incluido a España",
     ],
-    badge: "Nuevo",
+    badge: "Selección VendeConIA",
     icon: "keyboard",
   },
   {
@@ -65,6 +65,40 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     ],
     badge: "Selección VendeConIA",
     icon: "car",
+  },
+  {
+    slug: "correa-manos-libres-perro",
+    name: "Correa Manos Libres para Perro",
+    shortName: "Correa Manos Libres",
+    price: 27.99,
+    tagline: "Camina o corre con tu perro sin llevar la correa en la mano.",
+    description:
+      "Correa ajustable para paseo y running con cinturón de cintura y sistema manos libres para moverte con mayor comodidad.",
+    benefits: [
+      "Diseñada para caminar, correr o trotar",
+      "Sistema manos libres con cinturón ajustable",
+      "Disponible en varios colores",
+      "Envío incluido a España",
+    ],
+    badge: "Mascotas",
+    icon: "pet",
+  },
+  {
+    slug: "disfraz-vaquero-mascota",
+    name: "Disfraz Vaquero para Mascotas",
+    shortName: "Disfraz Vaquero Mascota",
+    price: 21.99,
+    tagline: "Un disfraz llamativo para fiestas, Halloween y sesiones de fotos.",
+    description:
+      "Disfraz tipo jinete vaquero para perros y otras mascotas, pensado para ocasiones especiales y contenido divertido en redes sociales.",
+    benefits: [
+      "Tallas S, M, L y XL",
+      "Diseño visual y fácil de mostrar en vídeo",
+      "Ideal para fiestas, Halloween y fotos",
+      "Envío incluido a España",
+    ],
+    badge: "Mascotas",
+    icon: "pet",
   },
 ];
 
@@ -104,7 +138,7 @@ export function Storefront() {
         </p>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 pb-16 md:grid-cols-3">
+      <section className="mx-auto grid max-w-6xl gap-6 px-5 pb-16 sm:grid-cols-2 lg:grid-cols-3">
         {STORE_PRODUCTS.map((product) => (
           <article key={product.slug} className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-xl">
             <div className="flex h-56 items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-cyan-300">
