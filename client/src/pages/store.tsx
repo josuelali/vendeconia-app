@@ -7,7 +7,6 @@ export type StoreProduct = {
   name: string;
   shortName: string;
   price: number;
-  compareAt?: number;
   tagline: string;
   description: string;
   benefits: string[];
@@ -21,7 +20,6 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     name: "Guante Quitapelos Reutilizable para Mascotas",
     shortName: "Guante Quitapelos",
     price: 14.99,
-    compareAt: 19.99,
     tagline: "Retira pelos de sofá, ropa y textiles en segundos.",
     description:
       "Guante de limpieza reutilizable pensado para recoger pelo de mascotas de superficies textiles sin recambios ni consumibles.",
@@ -39,7 +37,6 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     name: "Kit de Limpieza 7 en 1 para Electrónica",
     shortName: "Kit Limpieza 7 en 1",
     price: 16.99,
-    compareAt: 22.99,
     tagline: "Un solo kit para teclado, auriculares y dispositivos.",
     description:
       "Kit compacto de limpieza para retirar polvo y suciedad de teclados, auriculares, pantallas y pequeños dispositivos electrónicos.",
@@ -57,7 +54,6 @@ export const STORE_PRODUCTS: StoreProduct[] = [
     name: "Soporte 360° para Teléfono o Tablet en Coche",
     shortName: "Soporte Coche 360°",
     price: 24.99,
-    compareAt: 29.99,
     tagline: "Pantalla estable para los pasajeros de los asientos traseros.",
     description:
       "Soporte ajustable para reposacabezas con rotación de 360 grados, diseñado para sujetar teléfonos o tablets durante los trayectos.",
@@ -120,9 +116,8 @@ export function Storefront() {
               <p className="mt-2 min-h-12 text-sm leading-6 text-slate-300">{product.tagline}</p>
               <div className="mt-5 flex items-end gap-2">
                 <strong className="text-3xl"><Money value={product.price} /></strong>
-                {product.compareAt && <span className="pb-1 text-sm text-slate-500 line-through"><Money value={product.compareAt} /></span>}
               </div>
-              <p className="mt-1 text-xs text-slate-400">IVA incluido · Envío incluido a España</p>
+              <p className="mt-1 text-xs text-slate-400">Precio final mostrado · Envío incluido a España</p>
               <Link
                 href={`/tienda/${product.slug}`}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-300"
@@ -205,9 +200,8 @@ export function StoreProductPage() {
 
             <div className="mt-8 flex items-end gap-3">
               <strong className="text-4xl"><Money value={product.price} /></strong>
-              {product.compareAt && <span className="pb-1 text-slate-500 line-through"><Money value={product.compareAt} /></span>}
             </div>
-            <p className="mt-2 text-xs text-slate-400">IVA incluido · Envío incluido a direcciones en España</p>
+            <p className="mt-2 text-xs text-slate-400">Precio final mostrado · Envío incluido a direcciones en España</p>
 
             <button
               type="button"
