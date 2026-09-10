@@ -6,6 +6,7 @@ import express, {
 import http from "http";
 import cors from "cors";
 import { registerRoutes } from "./routes";
+import { registerStoreRoutes } from "./storeRoutes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -69,6 +70,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 (async () => {
   await registerRoutes(app);
+  registerStoreRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err?.status || err?.statusCode || 500;
