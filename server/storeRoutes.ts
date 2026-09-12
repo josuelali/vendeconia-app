@@ -17,7 +17,14 @@ const STORE_PRODUCTS: Record<string, StoreProduct> = {
   "estuche-electronica-viaje": { name:"Estuche Organizador para Cables y Electrónica", unitAmount:1399, variants:["Negro","Blanco","Azul","Rosa","Morado"] },
   "guante-masaje-quitapelos": { name:"Guante de Masaje Quitapelos para Perro y Gato", unitAmount:1399, variants:["Derecha","Izquierda"] },
   "pelota-automatica-perro": { name:"Pelota Interactiva Automática para Perro", unitAmount:1799, variants:["Rojo","Verde"] },
-  "gafas-inteligentes-camara": { name:"Gafas Inteligentes Bluetooth con Cámara", unitAmount:2499 }
+  "gafas-inteligentes-camara": { name:"Gafas Inteligentes Bluetooth con Cámara", unitAmount:2499 },
+
+  "raton-inalambrico-rgb": { name:"Ratón Inalámbrico RGB Recargable Bluetooth/USB", unitAmount:1299 },
+  "dedo-medio-caja": { name:"Dedo Medio Dorado en Caja de Regalo", unitAmount:999 },
+  "microfono-lavalier-usbc": { name:"Micrófono Lavalier Inalámbrico USB-C", unitAmount:1399 },
+  "tira-led-rgb-bluetooth-usb": { name:"Tira LED RGB 5050 USB con Bluetooth — 1 m", unitAmount:1099 },
+  "control-ir-tuya-wifi": { name:"Control Remoto Universal IR Tuya WiFi", unitAmount:1599 },
+  "auriculares-bluetooth-53": { name:"Auriculares Bluetooth 5.3 con Estuche LED", unitAmount:1699 },
 };
 
 const AUCTION = {
