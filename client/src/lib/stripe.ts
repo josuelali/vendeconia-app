@@ -1,8 +1,8 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RNALTE15RCURYu3jErT82VBtn5GhI5rykGcu5MCcmXwwiyWGQqKJdhuuUNGqrhUcz1dVi6N2vzfhfBvCxEXmVxB00wmbHZfOJ';
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
-export const stripePromise = loadStripe(stripeKey);
+export const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 export const createSubscription = async (priceId: string) => {
   const response = await fetch('/api/create-subscription', {

@@ -7,8 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51RNALTE15RCURYu3jErT82VBtn5GhI5rykGcu5MCcmXwwiyWGQqKJdhuuUNGqrhUcz1dVi6N2vzfhfBvCxEXmVxB00wmbHZfOJ';
-const stripePromise = loadStripe(stripeKey);
+const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 const SubscribeForm = ({ clientSecret }: { clientSecret: string }) => {
   const stripe = useStripe();
