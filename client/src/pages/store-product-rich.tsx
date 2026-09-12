@@ -96,6 +96,37 @@ const EXTRA: Record<string, ExtraInfo> = {
     use: ["Carga el dispositivo antes del primer uso.", "Empareja por Bluetooth cuando corresponda.", "Consulta las instrucciones de la unidad para las funciones de cámara."],
     notes: ["No se anuncian resoluciones, funciones de IA ni otras prestaciones no verificadas."],
   },
+  "raton-inalambrico-rgb": {
+    intro: "Ratón inalámbrico recargable con conexión Bluetooth/USB e iluminación RGB, pensado para uso cotidiano con equipos compatibles.",
+    idealFor: ["Ordenador portátil", "PC", "Tablet compatible", "Escritorio"],
+    use: ["Carga el ratón por USB antes del primer uso.", "Conéctalo por el modo inalámbrico compatible con tu dispositivo.", "Comprueba el funcionamiento y ajusta la posición de uso."],
+  },
+  "dedo-medio-caja": {
+    intro: "Figura decorativa dorada presentada en caja, pensada como regalo de broma u objeto llamativo de escritorio.",
+    idealFor: ["Regalo de broma", "Escritorio", "Decoración", "Detalle divertido"],
+    use: ["Abre la caja y coloca la figura en una superficie estable.", "Úsala como objeto decorativo o regalo.", "Guárdala en la caja cuando no se utilice."],
+  },
+  "microfono-lavalier-usbc": {
+    intro: "Micrófono Lavalier inalámbrico con receptor USB-C para grabación de voz en dispositivos compatibles.",
+    idealFor: ["Vídeos", "Entrevistas", "Contenido para redes", "Dispositivos USB-C compatibles"],
+    use: ["Conecta el receptor USB-C al dispositivo compatible.", "Enciende el micrófono y comprueba la conexión.", "Coloca el micrófono cerca de la voz antes de grabar."],
+  },
+  "tira-led-rgb-bluetooth-usb": {
+    intro: "Tira LED RGB 5050 de 1 metro con alimentación USB y control Bluetooth/IR para iluminación ambiental.",
+    idealFor: ["TV", "Escritorio", "Habitación", "Iluminación ambiental"],
+    use: ["Limpia y seca la superficie antes de pegarla.", "Conecta la tira a una alimentación USB 5 V.", "Utiliza el control Bluetooth/IR compatible para ajustar la iluminación."],
+  },
+  "control-ir-tuya-wifi": {
+    intro: "Control remoto universal WiFi IR Tuya para centralizar equipos compatibles por infrarrojos desde la app y asistentes compatibles.",
+    idealFor: ["Aire acondicionado compatible", "Equipos con mando infrarrojo", "Hogar conectado", "Usuarios de Tuya/Smart Life"],
+    use: ["Conecta el controlador a la red WiFi siguiendo la app compatible.", "Añade el equipo infrarrojo que quieras controlar.", "Configura Alexa o Google Home solo cuando el dispositivo y la app lo permitan."],
+  },
+  "auriculares-bluetooth-53": {
+    intro: "Auriculares inalámbricos Bluetooth 5.3 en variante negra sin funciones de traducción IA, con estuche de carga e indicador LED.",
+    idealFor: ["Música", "Audio inalámbrico", "Móvil", "Uso cotidiano"],
+    use: ["Carga el estuche mediante USB Type-C.", "Empareja los auriculares por Bluetooth con el dispositivo.", "Utiliza los controles táctiles indicados en la ficha del producto."],
+    notes: ["La variante seleccionada es BT5.3 BK No AI. No se anuncia traducción mediante IA."],
+  },
 };
 
 function Money({ value }: { value: number }) {
