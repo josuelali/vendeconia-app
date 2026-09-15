@@ -2,6 +2,7 @@ import type { ProductMedia } from "@/components/PremiumProductGallery";
 
 // Arquitectura preparada para los 30 productos. En fase piloto solo se activa uno.
 export const PREMIUM_PRODUCT_MEDIA: Record<string, ProductMedia> = {
+  "luz-led-sensor-movimiento": { images: ["/store/products/premium/luz-led-sensor-movimiento/01.jpg", "/store/products/premium/luz-led-sensor-movimiento/02.jpg", "/store/products/premium/luz-led-sensor-movimiento/03.jpg", "/store/products/premium/luz-led-sensor-movimiento/04.jpg", "/store/products/premium/luz-led-sensor-movimiento/05.jpg"] },
   "bascula-digital-equipaje": {
     images: [
       "/store/products/premium/bascula-digital-equipaje/02.jpg",
