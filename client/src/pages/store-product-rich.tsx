@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowLeft, Check, CreditCard, Info, PackageCheck, ShieldCheck, Truck } from "lucide-react";
 import { STORE_PRODUCTS } from "@/pages/store";
+import PremiumProductGallery from "@/components/PremiumProductGallery";
+import { PREMIUM_PRODUCT_MEDIA } from "@/lib/store-premium-media";
 
 type ExtraInfo = {
   intro: string;
@@ -178,9 +180,13 @@ export default function StoreProductRich() {
         <Link href="/tienda" className="inline-flex items-center gap-2 text-sm font-bold"><ArrowLeft className="h-4 w-4"/> Volver a la tienda</Link>
 
         <div className="mt-7 grid gap-10 lg:grid-cols-[1.08fr_.92fr]">
-          <div className="overflow-hidden border-2 border-zinc-950 bg-zinc-100 shadow-[10px_10px_0_#E8FF00]">
-            <img src={product.image} alt={product.imageAlt} className="aspect-square h-full w-full object-cover" />
-          </div>
+          {PREMIUM_PRODUCT_MEDIA[product.slug] ? (
+            <PremiumProductGallery image={product.image} imageAlt={product.imageAlt} media={PREMIUM_PRODUCT_MEDIA[product.slug]} />
+          ) : (
+            <div className="overflow-hidden border-2 border-zinc-950 bg-zinc-100 shadow-[10px_10px_0_#E8FF00]">
+              <img src={product.image} alt={product.imageAlt} className="aspect-square h-full w-full object-cover" />
+            </div>
+          )}
 
           <div className="lg:py-4">
             <span className="inline-block bg-red-600 px-3 py-2 text-xs font-black uppercase tracking-wider text-white">{product.badge}</span>
