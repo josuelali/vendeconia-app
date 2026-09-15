@@ -12,7 +12,7 @@ export const PREMIUM_PRODUCT_MEDIA: Record<string, ProductMedia> = {
     ],
   },
   "auriculares-bluetooth-53": { images: ["/store/products/nuevos/auriculares-bt53-alternativa.avif"] },
-  "control-remoto-ir-wifi-tuya": { images: ["/store/products/nuevos/control-ir-tuya-alternativa.avif"] },
+  "control-ir-tuya-wifi": { images: ["/store/products/nuevos/control-ir-tuya-alternativa.avif"] },
   "dedo-medio-caja": { images: ["/store/products/nuevos/dedo-medio-caja-alternativa.avif"] },
   "raton-inalambrico-rgb": { images: ["/store/products/nuevos/raton-rgb-alternativa.avif"] },
 };
