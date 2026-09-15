@@ -25,7 +25,15 @@ const STORE_PRODUCTS: Record<string, StoreProduct> = {
   "tira-led-rgb-bluetooth-usb": { name:"Tira LED RGB 5050 USB con Bluetooth — 1 m", unitAmount:1099 },
   "control-ir-tuya-wifi": { name:"Control Remoto Universal IR Tuya WiFi", unitAmount:1599 },
   "auriculares-bluetooth-53": { name:"Auriculares Bluetooth 5.3 con Estuche LED", unitAmount:1699 },
-};
+  "bascula-digital-equipaje": { name:"Báscula Digital Portátil para Equipaje", unitAmount:1299 },
+  "luz-led-sensor-movimiento": { name:"Luz LED Recargable con Sensor de Movimiento", unitAmount:1499 },
+  "impresora-termica-portatil-58mm": { name:"Impresora Térmica Portátil Bluetooth de 58 mm", unitAmount:2499 },
+  "soplador-aire-recargable": { name:"Soplador de Aire Eléctrico Recargable", unitAmount:2999 },
+  "soporte-portatil-aluminio": { name:"Soporte Plegable de Aluminio para Portátil", unitAmount:1999 },
+  "bolsas-vacio-ropa": { name:"Bolsas de Compresión al Vacío para Ropa", unitAmount:1699 },
+  "quitapelusas-electrico-usbc": { name:"Quitapelusas Eléctrico Recargable USB-C", unitAmount:1799 },
+  "hub-usbc-8-en-1": { name:"Hub USB-C Multipuerto 8 en 1", unitAmount:2499 },
+  "dispensador-jabon-automatico": { name:"Dispensador Automático de Jabón con Sensor", unitAmount:2499 },};
 
 const AUCTION = {
   id: "bombilla-wifi-tuya-v1",
